@@ -1,22 +1,25 @@
 buildscript {
-    ext {
-        springBootVersion = '2.1.0.RELEASE'
-    }
+    apply from: 'dependency.gradle'
+
     repositories {
-        mavenCentral()
+        maven { url "http://git.manystar.com/nexus/content/groups/public/" }
+        maven { url "https://repo.spring.io/libs-milestone/" }
     }
+
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${versions.springBoot}")
+        classpath("se.transmode.gradle:gradle-docker:${versions.gradleDocker}")
+        classpath "io.spring.gradle:dependency-management-plugin:${versions.dependencyManagement}"
     }
 }
 
 apply plugin: 'java'
-apply plugin: 'eclipse'
+apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'docker'
 
 group = 'com.qq.zhu'
-version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
 repositories {
@@ -25,11 +28,55 @@ repositories {
 
 
 dependencies {
+    implementation(
+            libraries['mybatisSpringBoot'],
+            libraries['springfoxSwagger2'],
+            libraries['springfoxSwaggerUI'],
+    )
+
+
     implementation('org.springframework.boot:spring-boot-starter-amqp')
     implementation('org.springframework.boot:spring-boot-starter-data-redis')
     implementation('org.springframework.boot:spring-boot-starter-web')
-    implementation('org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.2')
-    runtimeOnly('mysql:mysql-connector-java')
-    compileOnly('org.projectlombok:lombok')
     testImplementation('org.springframework.boot:spring-boot-starter-test')
+
+    compileOnly 'org.projectlombok:lombok:1.18.4'
+    annotationProcessor 'org.projectlombok:lombok:1.18.4'
+}
+
+bootJar {
+    mainClassName = "com.qq.zhu.demo.Application"
+}
+
+jar {
+    baseName = project.name
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources','src/main/java']
+        }
+
+        output.resourcesDir = 'build/classes/main'
+    }
+
+    test {
+        output.resourcesDir = "build/classes/test"
+    }
+}
+
+task buildDocker(type: Docker, dependsOn: build) {
+//    push = true
+    applicationName = jar.baseName
+    dockerfile = file('Dockerfile')
+    doFirst {
+        copy {
+            from jar
+            into stageDir
+        }
+    }
 }

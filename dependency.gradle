@@ -1,0 +1,14 @@
+ext.versions = [
+        dependencyManagement        : '1.0.3.RELEASE',
+        gradleDocker                : '1.2',
+        mybatisSpringBoot           : '1.3.2',
+        springBoot                  : '2.1.0.RELEASE',
+        springfoxSwagger2           : '2.8.0',
+]
+
+ext.libraries = [
+        mybatisSpringBoot           : "org.mybatis.spring.boot:mybatis-spring-boot-starter:${versions.mybatisSpringBoot}",
+        springBoot                  : "org.springframework.boot:spring-boot-starter:${versions.springBoot}",
+        springfoxSwagger2           : "io.springfox:springfox-swagger2:${versions.springfoxSwagger2}",
+        springfoxSwaggerUI          : "io.springfox:springfox-swagger-ui:${versions.springfoxSwagger2}",
+]
